@@ -68,17 +68,12 @@ done
 MAX_BR=`cat /sys/class/backlight/intel_backlight/max_brightness`
 CURR_BR=`cat /sys/class/backlight/intel_backlight/brightness`
 
-echo "" >> /tmp/br
-date >> /tmp/br
-echo "We are now at $CURR_BR of $MAX_BR" >> /tmp/br
-
 # Set goal
 NEW=$((CURR_GOAL+STEP*5))
 get_lvl
 LAG=$((CURR_GOAL-LEVEL))
 if [ $LAG != 0 ]; then
     NEW=$((NEW+STEP*10))
-    echo "LAG! Step it up!"
 fi
 if [ $NEW -gt 100 ]; then
     NEW=100
@@ -87,29 +82,15 @@ elif [ $NEW -lt 0 ]; then
 fi
 echo $NEW > $GOAL_FILE
 
-
 [ $NEW -ge 100 ] && NEW_BR=$MAX_BR || get_br $NEW
-
 
 DELTA=$((NEW_BR-CURR_BR))
 [ $DELTA = 0 ] && exit 0
 STEP_BR=$((DELTA/8))
 [ $STEP_BR = 0 ] && STEP_BR=$STEP
 
-
-echo "We are at $LEVEL, goal is $NEW (was $CURR_GOAL), LAG: $LAG" >> /tmp/br
-echo "Delta is $DELTA" >> /tmp/br
-echo "Step is $STEP_BR" >> /tmp/br
-echo "$((CURR_BR+STEP_BR)) $STEP_BR $NEW_BR" >> /tmp/br
-#DELTA=`echo "scale=0; sqrt($BR)" | bc -l`
-
 for i in `seq $((CURR_BR+STEP_BR)) $STEP_BR $NEW_BR`; do
     echo $i | sudo tee $SYSFILE
 done
 echo $NEW_BR | sudo tee $SYSFILE
 
-echo "" >> /tmp/br
-
-
-exit 0
-sleep 60
