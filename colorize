@@ -18,7 +18,7 @@ IFS="|" read -r -a COLOR_A <<< $COLORIZE_STR
 REGEX=""
 for i in "${COLOR_A[@]}"; do
     IFS=" " read -r -a LINE_A <<< $i
-    J=${#LINE_A}
+    J=${#LINE_A[@]}
     J=$((J-1))
     HOW=${LINE_A[$J]}
     J=$((J-1))
@@ -28,9 +28,9 @@ for i in "${COLOR_A[@]}"; do
     WHAT=${LINE_A[@]:0:$J}
 
     if [ "$HOW" = "l" ]; then
-	REGEX="${REGEX}s/\(.*$WHAT.*\)/$COLOR\1$RST/;"
+	REGEX="${REGEX}s/(.*$WHAT.*)/$COLOR\1$RST/;"
     else
-	REGEX="${REGEX}s/$WHAT/$COLOR$WHAT$RST/;"
+	REGEX="${REGEX}s/($WHAT)/$COLOR\1$RST/;"
     fi
 done
 
