@@ -27,12 +27,11 @@ for i in "${COLOR_A[@]}"; do
     RST=`printf $txtrst`
     WHAT=${LINE_A[@]:0:$J}
 
-#    echo "$WHAT $COLOR_STR $HOW"
     if [ "$HOW" = "l" ]; then
-	REGEX="$REGEX; s/\(.*$WHAT.*\)/$COLOR\1$RST/"
+	REGEX="${REGEX}s/\(.*$WHAT.*\)/$COLOR\1$RST/;"
     else
-	REGEX="$REGEX; s/$WHAT/$COLOR$WHAT$RST/"
+	REGEX="${REGEX}s/$WHAT/$COLOR$WHAT$RST/;"
     fi
 done
 
-sed -e "$REGEX" $@
+sed -re "$REGEX" $@
