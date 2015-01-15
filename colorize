@@ -14,6 +14,7 @@
 #CADET ... EEEE \033[1;37m l"
 
 IFS="|" read -r -a COLOR_A <<< $COLORIZE_STR
+RST=`printf $txtrst`
 
 REGEX=""
 for i in "${COLOR_A[@]}"; do
@@ -24,7 +25,6 @@ for i in "${COLOR_A[@]}"; do
     J=$((J-1))
     COLOR_STR=${LINE_A[$J]}
     COLOR=`echo -e $COLOR_STR`
-    RST=`printf $txtrst`
     WHAT=${LINE_A[@]:0:$J}
 
     if [ "$HOW" = "l" ]; then
