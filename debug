@@ -27,10 +27,10 @@ fi
 
 echo "Using $COREFILE"
 
-EXECPATH=${COREFILE##*.}
+EXECPATH=${COREFILE#*!}
 EXECPATH=`echo $EXECPATH | sed -e 's/!/\//g'`
 echo $EXECPATH
 echo ""
 echo ""
 
-gdb --core $COREFILE $EXECPATH
+gdb --core $COREFILE /$EXECPATH
