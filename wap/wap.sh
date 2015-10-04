@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 DEFAULT_IF=ra0
 
 # Command line args
@@ -16,10 +14,21 @@ fi
 
 # Configuration dir
 CONF_DIR=${1%/}
+CONF_NAME=`basename $CONF_DIR`
+ROOT_DIR=`dirname $0`
+CONF_DIR="$ROOT_DIR/$CONF_NAME"
 if [ ! -d "$CONF_DIR" ]; then
     echo $CONF_DIR is not a valid config directory
+    exit 1
 fi
-mkdir -p .run/$CONF_DIR || exit 1
+
+if [ -z $XDG_RUNTIME_DIR ]; then
+    RUN_DIR="/tmp/ap/$CONF_NAME"
+else
+    RUN_DIR="$XDG_RUNTIME_DIR/ap/$CONF_NAME"
+fi
+
+mkdir -p $RUN_DIR || exit 1
 
 # IP for network
 if [ -f "$CONF_DIR/IP" ]; then
@@ -33,7 +42,7 @@ fi
 while ip addr | grep "192\.168\.$SUBNET\." > /dev/null; do
     SUBNET=$((SUBNET+1))
 done
-ifconfig $IFACE $PREFIX.$SUBNET.1 up
+ifconfig $IFACE $PREFIX.$SUBNET.1/24 up
 echo PREFIX=$PREFIX SUBNET=$SUBNET
 
 
@@ -44,7 +53,7 @@ if [ -z "$GW" ]; then
     sleep 2
 fi
 
-cat /proc/sys/net/ipv4/ip_forward > .run/$CONF_DIR/ip_fwd.$$
+cat /proc/sys/net/ipv4/ip_forward > $RUN_DIR/ip_fwd.$$
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
 if [ $# -lt 3 -o "$3" != "--secure" ]; then
@@ -55,19 +64,19 @@ if [ $# -lt 3 -o "$3" != "--secure" ]; then
     iptables -A FORWARD -i $IFACE -d 10.0.0.0/8 -j DROP
 fi
 
-[ -n "$GW" ] && iptables -t nat -A POSTROUTING -s $PREFIX.$SUBNET.0/24 -o $GW -j MASQUERADE
+[ -n "$GW" -a ! -f $CONF_DIR/no_nat ] && iptables -t nat -A POSTROUTING -s $PREFIX.$SUBNET.0/24 -o $GW -j MASQUERADE
 
-sed -e "s/INTERFACE/$IFACE/g" $CONF_DIR/hostapd.conf > .run/$CONF_DIR/hostapd.$$.conf
-sed -e "s/INTERFACE/$IFACE/g;s/SUBNET/$SUBNET/g;s/PREFIX/$PREFIX/g" $CONF_DIR/dnsmasq.conf > .run/$CONF_DIR/dnsmasq.$$.conf
-sed -e "s/UNIQ/$$/g; s/CONFIG/$CONF_DIR/" .WAP > .run/$CONF_DIR/WAP.$$
+sed -e "s/INTERFACE/$IFACE/g" $CONF_DIR/hostapd.conf > $RUN_DIR/hostapd.$$.conf
+sed -e "s/INTERFACE/$IFACE/g;s/SUBNET/$SUBNET/g;s/PREFIX/$PREFIX/g" $CONF_DIR/dnsmasq.conf > $RUN_DIR/dnsmasq.$$.conf
+sed -e "s/UNIQ/$$/g; s|RUNDIR|$RUN_DIR|" $ROOT_DIR/.WAP > $RUN_DIR/WAP.$$
 
-screen -c .run/$CONF_DIR/WAP.$$
+screen -c $RUN_DIR/WAP.$$
 
-mv .run/$CONF_DIR/WAP.$$ .run/$CONF_DIR/WAP.old
-mv .run/$CONF_DIR/dnsmasq.$$.conf .run/$CONF_DIR/dnsmasq.conf.old
-mv .run/$CONF_DIR/hostapd.$$.conf .run/$CONF_DIR/hostapd.conf.old
+mv $RUN_DIR/WAP.$$ $RUN_DIR/WAP.old
+mv $RUN_DIR/dnsmasq.$$.conf $RUN_DIR/dnsmasq.conf.old
+mv $RUN_DIR/hostapd.$$.conf $RUN_DIR/hostapd.conf.old
 
-[ -n "$GW" ] && iptables -t nat -D POSTROUTING -s $PREFIX.$SUBNET.0/24 -o $GW -j MASQUERADE
+[ -n "$GW" -a ! -f $CONF_DIR/no_nat ] && iptables -t nat -D POSTROUTING -s $PREFIX.$SUBNET.0/24 -o $GW -j MASQUERADE
 
 if [ $# -lt 3 -o "$3" != "--secure" ]; then
     iptables -D FORWARD -i $IFACE -d 192.168.0.0/16 -j DROP
@@ -77,8 +86,8 @@ if [ $# -lt 3 -o "$3" != "--secure" ]; then
     iptables -D INPUT -i $IFACE -j DROP
 fi
 
-cat .run/$CONF_DIR/ip_fwd.$$ > /proc/sys/net/ipv4/ip_forward
-mv  .run/$CONF_DIR/ip_fwd.$$ .run/$CONF_DIR/ip_fwd.old
+cat $RUN_DIR/ip_fwd.$$ > /proc/sys/net/ipv4/ip_forward
+mv  $RUN_DIR/ip_fwd.$$ $RUN_DIR/ip_fwd.old
 
 ifconfig $IFACE 0.0.0.0
 ifconfig $IFACE down
