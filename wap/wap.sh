@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# TODO: add option to use daemons instead of tmux
 
 DEFAULT_IF=wifi0
 
@@ -17,10 +18,17 @@ fi
 # Configuration dir
 CONF_DIR=${1%/}
 CONF_NAME=`basename $CONF_DIR`
-ROOT_DIR=`dirname $0`
-CONF_DIR="$ROOT_DIR/$CONF_NAME"
+case $CONF_DIR in
+    /*)
+	echo "Using absolute path $CONF_DIR"
+	;;
+    *)
+	ROOT_DIR=`dirname $0`
+	CONF_DIR="$ROOT_DIR/$CONF_NAME"
+	;;
+esac
 if [ ! -d "$CONF_DIR" ]; then
-    echo $CONF_DIR is not a valid config directory
+    echo $1 is not a valid config directory
     exit 1
 fi
 
