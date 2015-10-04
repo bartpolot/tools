@@ -24,15 +24,17 @@ if [ ! -d "$CONF_DIR" ]; then
     exit 1
 fi
 
+
+# Runtime dir to store the config files
 if [ -z $XDG_RUNTIME_DIR ]; then
     RUN_DIR="/tmp/ap/$CONF_NAME"
 else
     RUN_DIR="$XDG_RUNTIME_DIR/ap/$CONF_NAME"
 fi
-
 mkdir -p $RUN_DIR || exit 1
 
-# IP for network
+
+# IP for the network
 if [ -f "$CONF_DIR/IP" ]; then
     LINE=`cat $CONF_DIR/IP`
     PREFIX=${LINE%.*}
@@ -55,9 +57,13 @@ if [ -z "$GW" ]; then
     sleep 2
 fi
 
+
+# Save ip_forward status
 cat /proc/sys/net/ipv4/ip_forward > $RUN_DIR/ip_fwd.$$
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
+
+# If --secure, don't allow incoming traffic
 if [ $# -lt 3 -o "$3" != "--secure" ]; then
     iptables -A INPUT -i $IFACE -p udp -j ACCEPT
     iptables -A INPUT -i $IFACE -j DROP
@@ -66,7 +72,15 @@ if [ $# -lt 3 -o "$3" != "--secure" ]; then
     iptables -A FORWARD -i $IFACE -d 10.0.0.0/8 -j DROP
 fi
 
+
+# Do NAT unless disabled or no gateway
 [ -n "$GW" -a ! -f $CONF_DIR/no_nat ] && iptables -t nat -A POSTROUTING -s $PREFIX.$SUBNET.0/24 -o $GW -j MASQUERADE
+
+
+##########################################################
+
+
+##########################################################
 
 sed -e "s/INTERFACE/$IFACE/g" $CONF_DIR/hostapd.conf > $RUN_DIR/hostapd.$$.conf
 sed -e "s/INTERFACE/$IFACE/g;s/SUBNET/$SUBNET/g;s/PREFIX/$PREFIX/g" $CONF_DIR/dnsmasq.conf > $RUN_DIR/dnsmasq.$$.conf
