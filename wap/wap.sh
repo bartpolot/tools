@@ -43,7 +43,8 @@ else
     PREFIX=192.168
     SUBNET=8
 fi
-while ip addr | grep "192\.168\.$SUBNET\." > /dev/null; do
+
+while ip addr | grep "$PREFIX\.$SUBNET\." > /dev/null; do
     SUBNET=$((SUBNET+1))
 done
 ifconfig $IFACE $PREFIX.$SUBNET.1/24 up
