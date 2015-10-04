@@ -1,0 +1,9 @@
+startup_message off
+screen hostapd .run/CONFIG/hostapd.UNIQ.conf
+logfile .run/CONFIG/hostapd.UNIQ.log
+log
+split
+focus
+screen dnsmasq -kdC .run/CONFIG/dnsmasq.UNIQ.conf
+logfile .run/CONFIG/dnsmasq.UNIQ.log
+log
