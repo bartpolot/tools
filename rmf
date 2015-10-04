@@ -20,7 +20,6 @@ trap cleanup 0
 echo `date` Start >> /tmp/rmf/log
 
 MUTED=0
-MUTED_VOL=15
 
 mpg123 --output pulse http://31.192.216.6:8001/rmf_fm |&
 while true; do
@@ -40,14 +39,12 @@ while true; do
 		L=`pactl list sink-inputs | grep -B 100 mpg123 | grep -e ^Sink | tail -n 1`
 		SINK_ID=${L#*#}
 		VOL=`pactl list sink-inputs | grep -B 100 mpg123 | grep -e Volume | tail -n 1 | sed -e 's/.* \([0-9]\+\)%.*/\1/'`
-		pactl set-sink-input-volume "$SINK_ID" "$MUTED_VOL%"
-#		echo Volume was $VOL, setting $SINK_ID to $MUTED_VOL%
+		pactl set-sink-input-volume "$SINK_ID" "$((VOL/4))%"
 	    fi
 	else
 	    if [ "$S" != "RMF FM" ]; then
 		MUTED=0
 		pactl set-sink-input-volume "$SINK_ID" "$VOL%"
-#		echo Volume back to $VOL for $SINK_ID
 	    fi
 	fi
 	
