@@ -47,8 +47,20 @@ fi
 while ip addr | grep "$PREFIX\.$SUBNET\." > /dev/null; do
     SUBNET=$((SUBNET+1))
 done
-ifconfig $IFACE $PREFIX.$SUBNET.1/24 up
 echo PREFIX=$PREFIX SUBNET=$SUBNET
+
+P=`echo $PREFIX | tr . _`
+tmux_session="ap-$CONF_NAME-${P}_${SUBNET}_0"
+if [ -n "$TMUX" ]; then
+    tmux rename-window $tmux_session
+else
+    tmux new-session -s $tmux_session $0 $@
+    exit
+fi
+ifconfig $IFACE $PREFIX.$SUBNET.1/24 up
+
+
+
 
 
 # Gateway
@@ -81,16 +93,35 @@ fi
 
 ##########################################################
 
+sed -e "s/INTERFACE/$IFACE/g" $CONF_DIR/hostapd.conf > $RUN_DIR/hostapd.$$.conf
+sed -e "s/INTERFACE/$IFACE/g;s/SUBNET/$SUBNET/g;s/PREFIX/$PREFIX/g" $CONF_DIR/dnsmasq.conf > $RUN_DIR/dnsmasq.$$.conf
+
+OLDTMUX=$TMUX
+unset TMUX
+
+tmux new-session -d -s __$tmux_session
+
+tmux rename-window -t __$tmux_session "DAEMON $tmux_session"
+tmux send-keys     -t __$tmux_session "hostapd -P $RUN_DIR/hostapd.$$.pid $RUN_DIR/hostapd.$$.conf" "C-m"
+tmux pipe-pane     -t __$tmux_session -o 'cat >> $RUN_DIR/hostapd.$$.log'
+
+
+DNSMASQ_OPT="--keep-in-foreground"
+DNSMASQ_OPT="$DNSMASQ_OPT --log-queries"
+DNSMASQ_OPT="$DNSMASQ_OPT --log-facility=-" # stderr
+DNSMASQ_OPT="$DNSMASQ_OPT --conf-file=$RUN_DIR/dnsmasq.$$.conf"
+DNSMASQ_OPT="$DNSMASQ_OPT --pid-file=$RUN_DIR/dnsmasq.$$.pid"
+tmux split-window  -t __$tmux_session -h
+tmux send-keys     -t __$tmux_session "dnsmasq $DNSMASQ_OPT" "C-m"
+tmux pipe-pane     -t __$tmux_session -o 'cat >> $RUN_DIR/dnsmasq.$$.log'
+
+tmux -2 attach-session -t __$tmux_session
+
+TMUX=$OLDTMUX
 
 ##########################################################
 
-sed -e "s/INTERFACE/$IFACE/g" $CONF_DIR/hostapd.conf > $RUN_DIR/hostapd.$$.conf
-sed -e "s/INTERFACE/$IFACE/g;s/SUBNET/$SUBNET/g;s/PREFIX/$PREFIX/g" $CONF_DIR/dnsmasq.conf > $RUN_DIR/dnsmasq.$$.conf
-sed -e "s/UNIQ/$$/g; s|RUNDIR|$RUN_DIR|" $ROOT_DIR/.WAP > $RUN_DIR/WAP.$$
 
-screen -c $RUN_DIR/WAP.$$
-
-mv $RUN_DIR/WAP.$$ $RUN_DIR/WAP.old
 mv $RUN_DIR/dnsmasq.$$.conf $RUN_DIR/dnsmasq.conf.old
 mv $RUN_DIR/hostapd.$$.conf $RUN_DIR/hostapd.conf.old
 
