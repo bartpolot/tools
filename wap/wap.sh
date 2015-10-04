@@ -66,7 +66,8 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 
 # If --secure, don't allow incoming traffic
 if [ $# -lt 3 -o "$3" != "--secure" ]; then
-    iptables -A INPUT -i $IFACE -p udp -j ACCEPT
+    iptables -A INPUT -i $IFACE -p udp --dport 53 -j ACCEPT
+    iptables -A INPUT -i $IFACE -p udp --dport 67 -j ACCEPT
     iptables -A INPUT -i $IFACE -j DROP
     iptables -A FORWARD -i $IFACE -d 192.168.0.0/16 -j DROP
     iptables -A FORWARD -i $IFACE -d 172.24.0.0/16 -j DROP
@@ -99,7 +100,8 @@ if [ $# -lt 3 -o "$3" != "--secure" ]; then
     iptables -D FORWARD -i $IFACE -d 192.168.0.0/16 -j DROP
     iptables -D FORWARD -i $IFACE -d 172.24.0.0/16 -j DROP
     iptables -D FORWARD -i $IFACE -d 10.0.0.0/8 -j DROP
-    iptables -D INPUT -i $IFACE -p udp -j ACCEPT
+    iptables -D INPUT -i $IFACE -p udp --dport 67 -j ACCEPT
+    iptables -D INPUT -i $IFACE -p udp --dport 53 -j ACCEPT
     iptables -D INPUT -i $IFACE -j DROP
 fi
 
