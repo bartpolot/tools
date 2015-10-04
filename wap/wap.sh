@@ -1,16 +1,18 @@
 #!/bin/bash
 
-DEFAULT_IF=ra0
+
+DEFAULT_IF=wifi0
 
 # Command line args
 if [ $# -lt 1 ]; then
     echo usage $0 CONF_DIR [IFACE] [--secure];
     exit 1;
 elif [ $# -lt 2 ]; then
-    IFACE=ra0;
+    IFACE=$DEFAULT_IF;
 else
     IFACE=$2;
 fi
+
 
 # Configuration dir
 CONF_DIR=${1%/}
