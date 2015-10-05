@@ -1,14 +1,16 @@
 #!/bin/bash
 
-LIST=`pacman -Qqu`
-ACT=` wc -w <<< $LIST`
-LIST=`echo $LIST`
+N=`pacman -Qqu | wc -l`
 
-if [ $ACT -eq 0 ]; then
+for p in `pacman -Qque`; do
+    LINE=$LINE${LINE+ / }$p
+done
+
+if [ $N -eq 0 ]; then
     echo "Up to date!"
     exit 0
 fi
 
 export XDG_RUNTIME_DIR=/run/user/$UID
 export DISPLAY=:0
-kdialog --title "Pacman: $ACT updates" --passivepopup "$LIST" 10
+kdialog --title "Pacman: $N updates, most important:" --passivepopup "$LINE" 10
