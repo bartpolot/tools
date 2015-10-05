@@ -89,6 +89,13 @@ count_gnunets
 
 Count statistics of running GNUnet experiments
 
+=================
+create_vnc_screen
+=================
+
+Create a virtual screen and starts a vnc server to use another computer as a secondary screen.
+
+
 ============
 dbus_suspend
 ============
