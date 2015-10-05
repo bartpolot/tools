@@ -164,6 +164,15 @@ install
 
 Install scripts: copy all shell scripts to the target directory stripping the extenstion.
 
+
+=========
+log_slice
+=========
+
+Show the contents of the GNUnet cadet log for a selected log fragment. The idea is to view logs with high
+level logging (WARNING, INFO), select a fragment and with a hotkey, show the complete DEBUG version, colorized.
+
+
 ==
 lx
 ==
