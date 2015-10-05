@@ -199,6 +199,13 @@ for instance from a cron task.
 
 
 ===========
+pacman_pony
+===========
+
+Let some ponies notify the user about any pending pacman updates, to use with cron.
+
+
+===========
 pacman_sync
 ===========
 
@@ -280,7 +287,6 @@ tvoff
 =====
 
 rmmod all tuner kernel modules for em28xx_dvb
-
 
 
 ==================
