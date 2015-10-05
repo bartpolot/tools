@@ -252,6 +252,24 @@ export PACMAN_SYNC_SSID="linksys eduroam home_wifi"
 Synching pacman at 01:27 on home wifi...
 
 
+
+===============
+remote_chromium
+===============
+
+Lauch chromium connecting to a remote ssh and using it as a proxy. 
+
+Stores the configuration at $HOME/.config/.remotes/. Each config dir should have the format
+
+NUM-remotehost
+
+Where NUM is for ordering and remotehost is the name of the host. It should be possible to connect
+with public key to the host.
+
+[user@system ~]$ remote_chromium HOST # starts chromium using HOST as a proxy
+[user@system ~]$ remote_chromium      # starts chromium for each host in $HOME/.config/.remotes/
+
+
 ===
 rmf
 ===
