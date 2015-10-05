@@ -38,6 +38,13 @@ br-
 Manage brightness of thinkpads/intel based laptops with smooth transitions.
 
 
+=======
+br_show
+=======
+
+Set brightness to the current level via dbus, in order to trigger KDE's OSD.
+
+
 ===
 btc
 ===
