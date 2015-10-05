@@ -130,6 +130,12 @@ g
 
 Show the 4th occurrence of ERROR in the file test_cadet.log, optionally with 20 lines of context (default 5).
 
+================
+gnunet-deb-build
+================
+
+Install all necessary debian packages to build GNUnet.
+
 
 ====
 gwif
