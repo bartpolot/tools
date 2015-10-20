@@ -308,6 +308,13 @@ ${color1}STOCK1 $color +1.00% | ${color1}STOCK2 $color -1.00% | ${color1}STOCK3 
  STOCK1 100.888 (  +0.99  +1.00%) |  99.888  99.890 100.988 ( 99.714 - 108.075) 03/07 14:35  100000
  [...]
 
+===========
+tmux-switch
+===========
+
+Switch tmux pane and blink the new pane briefly. Takes the same arguments as
+tmux select-pane (-U, -D, -L, -R).
+
 
 ============
 TorrentMagic
