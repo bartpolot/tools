@@ -12,7 +12,12 @@ function start_remote {
     
     kdialog --title "Chromium at..." --passivepopup "$H" 2
     sleep 1
-    chromium --high-dpi-support=1 --force-device-scale-factor=1 --proxy-server="socks5://localhost:$PORT" --user-data-dir=$CFGDIR
+    chromium \
+	--high-dpi-support=1 \
+	--force-device-scale-factor=1 \
+	--proxy-server="socks5://localhost:$PORT" \
+	--user-data-dir=$CFGDIR \
+	-disable-prompt-on-repost
     
     kill $SSHPID
 }
