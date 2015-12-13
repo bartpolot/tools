@@ -1,5 +1,7 @@
 #!/bin/sh
 
+MUTED=0
+
 mkdir -p /tmp/rmf
 
 cleanup ()
@@ -17,11 +19,17 @@ shutdown ()
 
 trap cleanup 0
 
-echo `date` Start >> /tmp/rmf/log
 
-MUTED=0
+URL=`curl --silent http://www.rmfon.pl/js/rmf.pls | sed -e 's/.*\(http[^"]*\).*/\1/'`
 
-mpg123 --output pulse http://31.192.216.6:8001/rmf_fm |&
+if [ -z $URL ]; then
+    echo "No URL in downloaded playlist"
+    exit 1
+fi
+
+echo `date` Start $URL >> /tmp/rmf/log
+
+mpg123 --output pulse $URL |&
 while true; do
     read i;
     D=`date`
