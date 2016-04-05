@@ -29,7 +29,7 @@ cd ~/.config/.remotes/
 if [ "$1" != "" ]; then
     start_remote $1
 else
-    for f in *; do
+    for f in *-*; do
 	start_remote $f
     done
 fi
