@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo "`pacman -Qqu | wc -l`"
+echo "`pacman -Qu $1 | grep -v '\[ignored\]' | wc -l`"
