@@ -1,3 +1,9 @@
+==========
+a2dp_reset
+==========
+
+Reset the a2dp sink by cycling it to HSP and back to A2DP, in order to get rid of any audio delay.
+
 ===
 avg
 ===
