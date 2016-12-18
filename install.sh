@@ -18,5 +18,5 @@ for i in *.sh; do
 	continue
     fi
 
-    cp "$i" "$TARGET/${i%%.sh}"
+    cp -v "$i" "$TARGET/${i%%.sh}" 
 done
