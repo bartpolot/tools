@@ -1,6 +1,6 @@
 PREFIX:=$$HOME
 
-bindir = $(PREFIX)/bin
+bindir = $(PREFIX)/local/bin
 
 all: avg
 
