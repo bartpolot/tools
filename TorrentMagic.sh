@@ -2,20 +2,26 @@
 
 echo "$@" > /tmp/testme
 
-DISPLAY=:0
+## READ config file
+#
+# EXAMPLE:
+# export remote_dir=$HOME/my_nfs_path
+# export auto_dir=.auto_torrent
+# export display=:0
+source $HOME/.config/TorrentMagic.rc
 
-ME=`basename $0`
+# Set variables
+me=`basename $0`
+DISPLAY=${display:-:0}
+remote=${remote_dir:-"$HOME/remote"}
+auto_dir=${auto_dir:-".auto_torrent"}
+target=$remote/$auto_dir
 
-REMOTE=$HOME/remote
-AUTO_DIR=.auto_torrent
-
-TARGET=$REMOTE/$AUTO_DIR
-
-
-if [ ! -w "$TARGET" ]; then
-    mount $REMOTE
-    if [ ! -w "$TARGET" ]; then
-	kdialog --error "Cant access remote" --title "Torrent"
+# Make sure the taget directory is available and mounted
+if [ ! -w "$target" ]; then
+    mount $remote
+    if [ ! -w "$target" ]; then
+	kdialog --error "Cant access remote \"$target\"" --title "Torrent"
 	exit 1
     fi
 fi
@@ -27,7 +33,7 @@ case $T in
 	N=`echo $T | sed -e 's/.*&dn=\([^&]*\).*/\1/'`	     
 	kdialog --title "Dowloading Magnet" --passivepopup "$N" 5
 	F="$N.magnet"
-	echo $T > "$TARGET/$F"
+	echo $T > "$target/$F"
 	;;
     *.torrent)
 	N=${T##*/}
@@ -36,30 +42,30 @@ case $T in
 	F=`basename "$T"`
 	umask 000
 	chmod a+rw "$T"
-	cp "$T" "$TARGET/$F"
+	cp "$T" "$target/$F"
 	;;
 esac
 
-kdialog --title "$ME" --passivepopup "Starting download:
+kdialog --title "$me" --passivepopup "Starting download:
 $N..." 5
 
-rm "$TARGET/$F.invalid"
+rm "$target/$F.invalid"
 while true; do
-    ls "$TARGET" > /dev/null
-    if [ -f "$TARGET/$F.invalid" ]; then
+    ls "$target" > /dev/null
+    if [ -f "$target/$F.invalid" ]; then
 	kdialog \
-	    --title "$ME" \
+	    --title "$me" \
 	    --passivepopup "Error downloading:
  $N
 Try again or call a kat." \
 	    15
-	rm "$TARGET/$F.invalid"
+	rm "$target/$F.invalid"
 	exit 1
     fi
-    if [ ! -f "$TARGET/$F" ]; then
+    if [ ! -f "$target/$F" ]; then
 	break
     fi
     sleep 0.5;
 done
 
-kdialog --title "$ME" --passivepopup "$N started!" 5
+kdialog --title "$me" --passivepopup "$N started!" 5
